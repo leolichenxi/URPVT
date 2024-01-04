@@ -6,12 +6,14 @@ namespace UnityEngine.Rendering.Universal.Internal
 {
     public class GeometryInstancingPass : ScriptableRenderPass
     {
-        public const string Tag = "GeometryInstancingPass";
         public EInstancePassType InstancePassType { get; private set; }
+        
+        private static GeometryInstancingManager s_Manager;
         public GeometryInstancingPass(RenderPassEvent renderPassEvent, EInstancePassType type)
         {
             this.renderPassEvent = renderPassEvent;
             this.InstancePassType = type;
+            s_Manager = GeometryInstancingManager.Instance;
         }
             
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -20,7 +22,19 @@ namespace UnityEngine.Rendering.Universal.Internal
             {
                 return;
             }
-            Debug.Log("GeometryInstancingPass Execute");
+            CommandBuffer cmd = CommandBufferPool.Get(InstanceConst.GeometryInstancingPassTag);
+
+            using (new ProfilingScope(cmd, new ProfilingSampler(InstanceConst.GeometryInstancingPassTag)))
+            {
+                cmd.Clear();
+                var buffers = s_Manager.BatchGroupBuffers;
+                for (int i = 0; i < buffers.Count; i++)
+                {
+                    buffers[i].DrawBatch(cmd);
+                }
+                context.ExecuteCommandBuffer(cmd);
+            }
+            CommandBufferPool.Release(cmd);
         }
     }
 }
