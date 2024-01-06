@@ -13,60 +13,44 @@ namespace UnityEngine.Rendering.Universal
             public int DataIndex;
         }
 
+        public EInstanceRenderMode InstanceRenderMode { get; } = EInstanceRenderMode.CommandInstancing;
         /// <summary>
         /// 物件的uid 对应的绘制位置
         /// </summary>
         private Dictionary<int, DrawHandler> m_uidToBatchIndex = new Dictionary<int, DrawHandler>();
 
+        private InstancingMaterialProperty m_instancingMaterialProperty = new InstancingMaterialProperty();
+        
         /// <summary>
         /// 所有的绘制列表
         /// </summary>
         private List<BatchGroup> m_drawGroups = new List<BatchGroup>();
 
-        public int MeshKey { get; private set; }
-        public int[] MaterialKey { get; private set; }
-
-        public int PreferSize = 512;
-        public byte ObjType { get; private set; }
-
-        public IReadOnlyList<BatchGroup> DrawGroupDatas => m_drawGroups;
+        public IReadOnlyList<BatchGroup> BatchGroups => m_drawGroups;
 
         public static ShadowCastingMode CastShadowMode = ShadowCastingMode.On;
         public static bool ReceiveShadows = true;
 
-        private Mesh m_Mesh;
-        private Material[] m_Materials;
-        private int m_MatNum;
-        private PassID[] m_passIds;
-        private bool m_impostor;
-
-        public bool ShadowCaster
-        {
-            get { return m_setting.HasShadow; }
-        }
-
+        private BatchObjectData m_batchObjectData;
         private DrawPrefabSetting m_setting;
+        private BatchGroupData m_batchGroupData;
+        
+        public bool ShadowCaster => m_setting.HasShadow;
+
 
         // 数据初始化
         public void Init(int meshKey, int[] materialKey, byte objType, DrawPrefabSetting setting)
         {
-            MeshKey = meshKey;
-            MaterialKey = materialKey;
-            ObjType = objType;
+            m_batchObjectData.MeshKey = meshKey;
+            m_batchObjectData.MaterialKey = materialKey;
+            m_batchObjectData. ObjType = objType;
             m_setting = setting;
         }
         
         // Render信息初始化
-        public void InitRenderInfo(Mesh mesh, Material[] materials)
+        public void SetRenderInfo(Mesh mesh, Material[] materials)
         {
-            m_Mesh = mesh;
-            m_Materials = materials;
-            int num = materials.Length;
-            m_passIds = new PassID[num];
-            for (int i = 0; i < m_passIds.Length; i++)
-            {
-                m_passIds[i].ReadPassFromMaterial(materials[i], m_impostor);
-            }
+            m_batchGroupData.SetInstanceRenderInfo(mesh,materials);
         }
 
         public bool IsEmpty()
@@ -98,12 +82,10 @@ namespace UnityEngine.Rendering.Universal
 
             m_uidToBatchIndex.Clear();
             m_drawGroups.Clear();
-            m_Mesh = null;
-            m_Materials = null;
-            m_passIds = null;
+            m_batchGroupData.ClearRef();
         }
 
-        public bool AddInstanceRenderInfo(int uid, Matrix4x4 matrix)
+        public bool AddInstanceObject(int uid, Matrix4x4 matrix)
         {
             if (m_uidToBatchIndex.TryGetValue(uid, out var drawHandler))
             {
@@ -124,7 +106,7 @@ namespace UnityEngine.Rendering.Universal
 
                 if (dataIndex < 0)
                 {
-                    var groupData = new BatchGroup(PreferSize);
+                    var groupData = new BatchGroup(InstanceConst.MAX_BATCH_DRAW_COUNT);
                     batchIndex = m_drawGroups.Count;
                     m_drawGroups.Add(groupData);
                     dataIndex = groupData.AddMatrix(uid, matrix);
@@ -136,7 +118,7 @@ namespace UnityEngine.Rendering.Universal
             return true;
         }
 
-        public bool RemoveInstance(int uid)
+        public bool RemoveInstanceObject(int uid)
         {
             if (m_uidToBatchIndex.TryGetValue(uid, out var drawHandler))
             {
@@ -151,6 +133,7 @@ namespace UnityEngine.Rendering.Universal
             }
             return false;
         }
+
 
         public void DrawBatch(CommandBuffer cmd)
         {
@@ -184,14 +167,14 @@ namespace UnityEngine.Rendering.Universal
         {
             if (batchGroup.HasElement)
             {
-                for (int i = 0; i < m_MatNum; i++)
+                for (int i = 0; i < m_batchGroupData.MatNum; i++)
                 {
-                    var passId = m_passIds[i];
+                    var passId = m_batchGroupData.PassIds[i];
                     if (m_setting.HasPreZ)
                     {
                         if (passId.HasAfterPreZPass)
                         {
-                            cmd.DrawMeshInstanced(m_Mesh, i, m_Materials[i], m_passIds[i].AfterPreZPass, batchGroup.MatrixBuffer, batchGroup.ValidLength,
+                            cmd.DrawMeshInstanced( m_batchGroupData.Mesh, i,  m_batchGroupData.Materials[i],  m_batchGroupData.PassIds[i].AfterPreZPass, batchGroup.MatrixBuffer, batchGroup.ValidLength,
                                 batchGroup.PropertyBlocks);
                             continue;
                         }
@@ -199,7 +182,7 @@ namespace UnityEngine.Rendering.Universal
 
                     if (passId.HasPass)
                     {
-                        cmd.DrawMeshInstanced(m_Mesh, i, m_Materials[i], m_passIds[i].Pass, batchGroup.MatrixBuffer, batchGroup.ValidLength, batchGroup.PropertyBlocks);
+                        cmd.DrawMeshInstanced( m_batchGroupData.Mesh, i, m_batchGroupData. Materials[i],  m_batchGroupData.PassIds[i].Pass, batchGroup.MatrixBuffer, batchGroup.ValidLength, batchGroup.PropertyBlocks);
                     }
                 }
             }
@@ -209,12 +192,12 @@ namespace UnityEngine.Rendering.Universal
         {
             if (batchGroup.HasElement)
             {
-                for (int i = 0; i < m_MatNum; i++)
+                for (int i = 0; i <  m_batchGroupData.MatNum; i++)
                 {
-                    var passId = m_passIds[i];
+                    var passId =  m_batchGroupData.PassIds[i];
                     if (passId.HasShadowCasterPass)
                     {
-                        cmd.DrawMeshInstanced(m_Mesh, i, m_Materials[i], m_passIds[i].ShadowCasterPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced( m_batchGroupData.Mesh, i,  m_batchGroupData.Materials[i],  m_batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
                     }
                 }
             }
@@ -224,12 +207,12 @@ namespace UnityEngine.Rendering.Universal
         {
             if (batchGroup.HasElement)
             {
-                for (int i = 0; i < m_MatNum; i++)
+                for (int i = 0; i <  m_batchGroupData.MatNum; i++)
                 {
-                    var passId = m_passIds[i];
+                    var passId =  m_batchGroupData.PassIds[i];
                     if (passId.HasPreZPass)
                     {
-                        cmd.DrawMeshInstanced(m_Mesh, i, m_Materials[i], m_passIds[i].PreZPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced( m_batchGroupData.Mesh, i,  m_batchGroupData.Materials[i],  m_batchGroupData.PassIds[i].PreZPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
                     }
                 }
             }

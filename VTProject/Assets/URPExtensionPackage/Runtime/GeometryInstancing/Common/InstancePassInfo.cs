@@ -7,6 +7,7 @@
         RenderingTransparent = 2,
         PreZ = 3,
     }
+    
     public struct DrawPrefabSetting
     {
         public bool HasShadow;
@@ -31,7 +32,6 @@
         {
             matView = cam.worldToCameraMatrix;
             matProj = cam.projectionMatrix;
-
             CameraPos = cam.transform.position;
             GeometryUtility.CalculateFrustumPlanes(cam, CameraPlanes);
         }

@@ -22,9 +22,13 @@ namespace UnityEngine.Rendering.Universal.Internal
             {
                 return;
             }
-            CommandBuffer cmd = CommandBufferPool.Get(InstanceConst.GeometryInstancingPassTag);
+            
+            Camera cam = renderingData.cameraData.camera;
+            // InstancePassInfo passInfo = s_Manager.SafeGetPassInfo(cam, InstancePassType);
+            // passInfo.UpdateCameraPlanes(cam);
+            CommandBuffer cmd = CommandBufferPool.Get(InstanceConst.GEOMETRY_INSTANCING_PASS_TAG);
 
-            using (new ProfilingScope(cmd, new ProfilingSampler(InstanceConst.GeometryInstancingPassTag)))
+            using (new ProfilingScope(cmd, new ProfilingSampler(InstanceConst.GEOMETRY_INSTANCING_PASS_TAG)))
             {
                 cmd.Clear();
                 var buffers = s_Manager.BatchGroupBuffers;
@@ -33,6 +37,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     buffers[i].DrawBatch(cmd);
                 }
                 context.ExecuteCommandBuffer(cmd);
+                cmd.Clear();
             }
             CommandBufferPool.Release(cmd);
         }

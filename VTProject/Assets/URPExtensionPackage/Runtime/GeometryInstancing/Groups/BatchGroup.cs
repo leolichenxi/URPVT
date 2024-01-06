@@ -14,8 +14,8 @@
         private int m_MaterialNum;
         public BatchGroup(int capacity)
         {
-            ValidLength = 0;
             Capacity = GetCapacity(capacity);
+            ValidLength = 0;
             m_buffer = new Matrix4x4[Capacity];
             m_objects = new int[Capacity];
             m_PropertyBlocks = new MaterialPropertyBlock();
@@ -100,9 +100,9 @@
 
         public static int GetCapacity(int need)
         {
-            if (need >= InstanceConst.MaxGeometryInstanceDrawCount)
+            if (need >= InstanceConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT)
             {
-                return InstanceConst.MaxGeometryInstanceDrawCount;
+                return InstanceConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT;
             }
 
             return need;
