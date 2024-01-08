@@ -4,32 +4,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 {
     public class ImpostorSnapshotPass: ScriptableRenderPass
     {
-        
-        private struct SnapshotTask
-        {
-            public ImpostorSnapshotAtlas.Snapshot Atlas;
-            public Mesh Mesh;
-            public Material[] Materials;
-            public int[] ShaderPass;
-            public int[] DepthPass;
 
-            public SnapshotTask(ImpostorSnapshotAtlas.Snapshot obj, Mesh mesh, Material[] materials)
-            {
-                Atlas = obj;
-                Materials = materials;
-                Mesh = mesh;
-                ShaderPass = new int[materials.Length];
-                DepthPass = new int[materials.Length];
-                for (int i = 0; i < materials.Length; ++i)
-                {
-                    ShaderPass[i] = materials[i].FindPass("ImpostorSnapshot");
-                    DepthPass[i] = materials[i].FindPass("ImpostorSnapshotShadow");
-                    ShaderPass[i] = ShaderPass[i] < 0 ? 0 : ShaderPass[i];
-                    DepthPass[i] = DepthPass[i] < 0 ? 0 : DepthPass[i];
-                }
-            }
-        }
-        
 
         private Matrix4x4 m_worldToCameraMatrix;
         private Matrix4x4 m_projectionMatrix;
@@ -41,8 +16,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         
         private bool m_pause = false;
         private Vector3 m_lastEulerAngles = Vector3.zero;
-        
-        private UQueue<SnapshotTask> m_tasksQueue = new UQueue<SnapshotTask>(); // 替换List避免编辑器嵌套调用时错误
+        private static GeometryInstancingManager s_Manager;
         
         public ImpostorSnapshotPass(RenderPassEvent evt)
         {
@@ -61,7 +35,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_tempDepth.name = "SnapshotTempDepth";
             m_tempDepth.useMipMap = false;
             m_tempDepth.filterMode = FilterMode.Point;
-            
+            s_Manager = GeometryInstancingManager.Instance;
         }
         
         
@@ -88,7 +62,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 Update();
             }
 
-            if (!m_pause && !m_tasksQueue.IsEmpty)
+            if (!m_pause && !s_Manager.IsTaskNotEmpty())
             {
                 //Vector3 vEye = -cam.transform.forward * 15;
                 //_worldToCameraMatrix = Matrix4x4.LookAt(vEye, Vector3.zero, cam.transform.up);
@@ -109,7 +83,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     cmd.Clear();
                     cmd.SetViewProjectionMatrices(m_worldToCameraMatrix,m_projectionMatrix);
                     cmd.SetGlobalVector(InstanceConst.ImpostorZBufferParam,ComputeZBufferParam());
-                    Queue<SnapshotTask> queue = m_tasksQueue.Switch();
+                    Queue<SnapshotTask> queue = s_Manager.SwitchTask();
                     while (queue.Count > 0)
                     {
                         SnapshotTask task = queue.Dequeue();

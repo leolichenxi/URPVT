@@ -1,5 +1,6 @@
 ﻿namespace UnityEngine.Rendering.Universal
 {
+    // 二级缓存
     public class BatchGroup
     {
         public bool HasElement => ValidLength > 0;

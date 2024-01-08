@@ -32,6 +32,8 @@
         public static int AtlasRTSize = 1024; // 512 *2
         public static int SnapRTSize = 256 ; // 128 *2 
         
+        public const int BLOCK_X = 4 ; // AtlasRTSize/ SnapRTSize 
+        public const int BLOCK_Y = 4 ; // AtlasRTSize/ SnapRTSize * 4 
         
         public const float IMPOSTOR_PROJECT_NEAR = -15.0f;
         public const float IMPOSTOR_PROJECT_FAR = 15.0f;
@@ -47,5 +49,11 @@
         
         public static int ImpostorZBufferParam = Shader.PropertyToID("_ImpostorZBufferParam");
         public static int VBufferDepthEncodingParams = Shader.PropertyToID("_VBufferDepthEncodingParams");
+        
+        
+        // ShaderPass[i] = materials[i].FindPass("ImpostorSnapshot");
+        // DepthPass[i] = materials[i].FindPass("ImpostorSnapshotShadow");
+        public  const string PASS_NAME_IMPOSTOR_SNAPSHOT = "ImpostorSnapshot";
+        public  const string PASS_NAME_IMPOSTOR_SNAPSHOT_SHADOW = "ImpostorSnapshotShadow";
     }
 }

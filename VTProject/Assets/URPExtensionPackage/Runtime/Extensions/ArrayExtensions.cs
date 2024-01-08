@@ -18,7 +18,7 @@ namespace UnityEngine.Rendering.Universal
             array.RemoveAt(lastIndex);
         }
         
-        public static void RemoveValueSwapAt<T>(this List<T> array, T value) where T : new()
+        public static void RemoveValueSwapAt<T>(this List<T> array, T value)   //where T : new()
         {
             int arrayIndex = array.IndexOf(value);
             if (arrayIndex >= array.Count || arrayIndex < 0)
@@ -33,7 +33,7 @@ namespace UnityEngine.Rendering.Universal
             array.RemoveAt(lastIndex);
         }
         
-        public static void RemoveSwapAt<T>(this List<T> array, int arrayIndex) where T : new()
+        public static void RemoveSwapAt<T>(this List<T> array, int arrayIndex) //where T : new()
         {
             if (arrayIndex >= array.Count || arrayIndex < 0)
             {
