@@ -31,12 +31,12 @@
 
         public bool AddInstanceObject(int uid, Matrix4x4 matrix)
         {
-          
+            return true;
         }
 
         public bool RemoveInstanceObject(int uid)
         {
-           
+            return true;
         }
 
         public void Clear()

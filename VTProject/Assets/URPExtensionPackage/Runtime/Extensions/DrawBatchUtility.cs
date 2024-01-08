@@ -4,6 +4,50 @@ namespace UnityEngine.Rendering.Universal
 {
     public static class DrawBatchUtility
     {
+        public static bool DoCopyColor(CommandBuffer cmd, RenderTargetIdentifier src)
+        {
+            cmd.Blit(src, BuiltinRenderTextureType.CurrentActive);
+            return true;
+        }
+        
+        public static RenderTexture CreateSnapColorRT(string rtName) 
+        {
+            RenderTextureFormat renderTextureFormat = InstanceConst.AtlasColorFormat;
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(InstanceConst.AtlasRTSize, InstanceConst.AtlasRTSize);
+            descriptor.depthBufferBits = 0;
+            descriptor.colorFormat = renderTextureFormat;
+            descriptor.useMipMap = true;
+            descriptor.autoGenerateMips = true;
+            descriptor.mipCount = 4;
+            descriptor.msaaSamples = 1;
+            var rt = new RenderTexture(descriptor);
+
+            rt.name = rtName;
+            rt.filterMode = FilterMode.Bilinear;
+
+            return new RenderTexture(descriptor);
+        }
+        
+        public static RenderTexture CreateSnapShadowRT(string rtName)
+        {
+            RenderTextureFormat renderTextureFormat = InstanceConst.AtlasShadowFormat;
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(InstanceConst.AtlasRTSize, InstanceConst.AtlasRTSize);
+            descriptor.depthBufferBits = 16;
+            descriptor.colorFormat = renderTextureFormat;
+            descriptor.useMipMap = false;
+            descriptor.autoGenerateMips = false;
+            descriptor.mipCount = 4;
+            descriptor.sRGB = false;
+            
+            var rt = new RenderTexture(descriptor);
+
+            rt.name = rtName;
+            rt.filterMode = FilterMode.Point;
+
+            return rt;
+        }
+
+        
         public static Mesh CreateImpostorMesh(Bounds bounds,ImpostorSnapshotAtlas.Snapshot snapshotRT)
         {
             Vector3 extents = bounds.extents;

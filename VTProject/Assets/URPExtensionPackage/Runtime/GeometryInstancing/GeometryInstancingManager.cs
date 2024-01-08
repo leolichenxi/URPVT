@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -25,6 +26,7 @@ namespace UnityEngine.Rendering.Universal
         
         public uint BoundsCheckCode = 0;
 
+        private int m_refreshSnapshot = 1;
         private void UpdateBoundsCheckCode()
         {
             BoundsCheckCode++;
@@ -32,6 +34,12 @@ namespace UnityEngine.Rendering.Universal
             {
                 BoundsCheckCode = 0;
             }
+        }
+        
+        
+        public void RefreshImpostor(int refresh = 1)
+        {
+            m_refreshSnapshot = refresh;
         }
 
         internal InstancePassInfo SafeGetPassInfo(Camera cam, EInstancePassType passType, int cascadeIndex = 0)
