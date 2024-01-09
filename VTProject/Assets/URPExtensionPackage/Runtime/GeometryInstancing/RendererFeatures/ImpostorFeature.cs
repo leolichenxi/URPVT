@@ -23,6 +23,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 return;
             }
+            renderer.EnqueuePass(m_impostorSnapshotPass);
             renderer.EnqueuePass(m_geometryInstancingOpaquePass);
             renderer.EnqueuePass(m_geometryInstancingTransparentPass);
         }

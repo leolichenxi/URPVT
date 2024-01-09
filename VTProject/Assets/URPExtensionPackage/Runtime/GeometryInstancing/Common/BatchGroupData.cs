@@ -24,6 +24,7 @@
             {
                 this.PassIds[i].ReadPassFromMaterial(materials[i], false);
             }
+            MatNum = num;
         }
         
         public void SetImpostorInstanceRenderInfo(Mesh mesh, Material[] materials)
@@ -39,7 +40,7 @@
                 material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_TEX), m_snapshotRT.SnapshotAtlas.ColorRT);
                 material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_DEPTH_TEX), m_snapshotRT.SnapshotAtlas.DepthRT);
             }
-            
+            MatNum = num;
             this.PassIds = new PassID[1];
             this.PassIds[0].ReadPassFromMaterial(materials[0], true);
         }

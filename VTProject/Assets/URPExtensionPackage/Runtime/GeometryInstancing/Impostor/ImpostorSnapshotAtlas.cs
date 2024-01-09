@@ -42,8 +42,8 @@ namespace UnityEngine.Rendering.Universal
                 m_index = indexInList;
                 m_blockNum = m_blockX * m_blockY;
                 m_snapshots = new List<Snapshot>(m_blockNum);
-                ColorRT = DrawBatchUtility.CreateSnapColorRT("SnapshotAtlas" + indexInList);
-                DepthRT = DrawBatchUtility.CreateSnapShadowRT("SnapshotDepthAtlas" + indexInList);
+                ColorRT = ImpostorUtility.CreateSnapColorRT("SnapshotAtlas" + indexInList);
+                DepthRT = ImpostorUtility.CreateSnapShadowRT("SnapshotDepthAtlas" + indexInList);
             }
 
             public void AddSnapShot(Snapshot snapshot)
@@ -93,7 +93,7 @@ namespace UnityEngine.Rendering.Universal
                 Rect viewPort = new Rect();
                 viewPort.Set(snapshot.u * InstanceConst.AtlasRTSize, snapshot.v * InstanceConst.AtlasRTSize, InstanceConst.SnapRTSize, InstanceConst.SnapRTSize);
                 cmd.SetViewport(viewPort);
-                DrawBatchUtility.DoCopyColor(cmd, src);
+                ImpostorUtility.DoCopyColor(cmd, src);
             }
 
             public void BlitDepth(CommandBuffer cmd, Snapshot snapshot, RenderTexture src)
@@ -103,7 +103,7 @@ namespace UnityEngine.Rendering.Universal
                 viewPort.Set(snapshot.u * InstanceConst.AtlasRTSize, snapshot.v * InstanceConst.AtlasRTSize, InstanceConst.SnapRTSize, InstanceConst.SnapRTSize);
                 cmd.SetViewport(viewPort);
                 //GraphicsEx.DrawTextureCB(cmd, source);
-                DrawBatchUtility.DoCopyColor(cmd, src);
+                ImpostorUtility.DoCopyColor(cmd, src);
             }
 
             public void Clear()

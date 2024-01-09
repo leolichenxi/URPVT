@@ -1,4 +1,6 @@
-﻿namespace UnityEngine.Rendering.Universal
+﻿using System;
+
+namespace UnityEngine.Rendering.Universal
 {
     public class CommandInstancingBuffer : IBatchGroupBuffer
     {
@@ -32,15 +34,47 @@
             BatchInstancedGroup.Clear();
         }
 
-        public void DrawBatch(CommandBuffer cmd)
+        public void DrawBatch(CommandBuffer cmd, InstancePassInfo passInfo)
         {
-            for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
+            switch (passInfo.passType)
             {
-                DrawBatchGroup(cmd, BatchInstancedGroup.BatchGroups[i]);
+                case EInstancePassType.ShadowCaster:
+                {
+                    DrawShadow(cmd);
+                }
+                    break;
+                case EInstancePassType.RenderingOpaque:
+                {
+                    if (!BatchInstancedGroup.Setting.IsTransparent)
+                    {
+                        for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
+                        {
+                            DrawBatchGroup(cmd, BatchInstancedGroup.BatchGroups[i]);
+                        }
+                    }
+                }
+                    break;
+                case EInstancePassType.RenderingTransparent:
+                    if (BatchInstancedGroup.Setting.IsTransparent)
+                    {
+                        for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
+                        {
+                            DrawBatchGroup(cmd, BatchInstancedGroup.BatchGroups[i]);
+                        }
+                    }
+                    break;
+                case EInstancePassType.PreZ:
+                    if (BatchInstancedGroup.Setting.HasPreZ)
+                    {
+                        DrawPreZ(cmd);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
 
-        public void DrawShadow(CommandBuffer cmd)
+        private void DrawShadow(CommandBuffer cmd)
         {
             if (!BatchInstancedGroup.ShadowCaster)
                 return;
@@ -50,7 +84,7 @@
             }
         }
 
-        public void DrawPreZ(CommandBuffer cmd)
+        private void DrawPreZ(CommandBuffer cmd)
         {
             if (!BatchInstancedGroup.Setting.HasPreZ)
                 return;
@@ -98,8 +132,7 @@
                     var passId = batchGroupData.PassIds[i];
                     if (passId.HasShadowCasterPass)
                     {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer,
-                            batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
                     }
                 }
             }

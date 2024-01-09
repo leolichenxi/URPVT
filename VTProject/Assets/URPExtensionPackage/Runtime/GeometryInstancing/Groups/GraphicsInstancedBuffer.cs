@@ -16,7 +16,7 @@
             throw new System.NotImplementedException();
         }
 
-        public void DrawBatch(CommandBuffer cmd)
+        public void DrawBatch(CommandBuffer cmd,InstancePassInfo passInfo)
         {
             throw new System.NotImplementedException();
         }

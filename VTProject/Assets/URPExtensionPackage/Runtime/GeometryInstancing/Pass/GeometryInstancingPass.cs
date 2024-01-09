@@ -6,6 +6,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 {
     public class GeometryInstancingPass : ScriptableRenderPass
     {
+        
         public EInstancePassType InstancePassType { get; private set; }
         
         private static GeometryInstancingManager s_Manager;
@@ -24,17 +25,16 @@ namespace UnityEngine.Rendering.Universal.Internal
             }
             
             Camera cam = renderingData.cameraData.camera;
-            // InstancePassInfo passInfo = s_Manager.SafeGetPassInfo(cam, InstancePassType);
-            // passInfo.UpdateCameraPlanes(cam);
+            InstancePassInfo passInfo = s_Manager.SafeGetPassInfo(cam, InstancePassType);
+            passInfo.UpdateCameraPlanes(cam);
             CommandBuffer cmd = CommandBufferPool.Get(InstanceConst.GEOMETRY_INSTANCING_PASS_TAG);
-
             using (new ProfilingScope(cmd, new ProfilingSampler(InstanceConst.GEOMETRY_INSTANCING_PASS_TAG)))
             {
                 cmd.Clear();
                 var buffers = s_Manager.BatchGroupBuffers;
                 for (int i = 0; i < buffers.Count; i++)
                 {
-                    buffers[i].DrawBatch(cmd);
+                    buffers[i].DrawBatch(cmd,passInfo);
                 }
                 context.ExecuteCommandBuffer(cmd);
                 cmd.Clear();

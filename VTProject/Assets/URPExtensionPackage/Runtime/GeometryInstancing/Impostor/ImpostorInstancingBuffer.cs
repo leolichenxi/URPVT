@@ -8,7 +8,7 @@
         private InstancingMaterialProperty m_instancingMaterialProperty = new InstancingMaterialProperty();
         public int Layer { get; set; }
         private Material[] SnapshotMaterails;
-        public BatchInstancedGroup BatchInstancedGroup = new BatchInstancedGroup();
+        public BatchInstancedGroup BatchInstancedGroup { get; private set; }  = new BatchInstancedGroup();
         private MaterialPropertyBlock m_propertyBlock = new MaterialPropertyBlock();
         internal float[][] m_PropertyFloatsBuffer;
         internal Vector4[][] m_PropertyVectorsBuffer;
@@ -55,7 +55,7 @@
             BatchInstancedGroup.SetImpostorInstanceRenderInfo(mesh, materials);
             if (!ImpostorMesh)
             {
-                ImpostorMesh = DrawBatchUtility.CreateImpostorMesh(mesh.bounds, m_snapshotRT);
+                ImpostorMesh = ImpostorUtility.CreateImpostorMesh(mesh.bounds, m_snapshotRT);
             }
 
             SnapshotMaterails = materials;
@@ -77,7 +77,7 @@
             BatchInstancedGroup.Clear();
         }
 
-        public void DrawBatch(CommandBuffer cmd)
+        public void DrawBatch(CommandBuffer cmd,InstancePassInfo passInfo)
         {
             for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
             {

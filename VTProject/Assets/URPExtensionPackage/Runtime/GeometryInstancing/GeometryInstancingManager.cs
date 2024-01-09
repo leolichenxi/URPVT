@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -22,7 +23,7 @@ namespace UnityEngine.Rendering.Universal
         
         public ImpostorSnapshotAtlas SnapshotAtlas { get; private set; } =  new ImpostorSnapshotAtlas();
 
-        public List<IBatchGroupBuffer> m_batchBuffer = new List<IBatchGroupBuffer>();
+        private List<IBatchGroupBuffer> m_batchBuffer = new List<IBatchGroupBuffer>();
         public IReadOnlyList<IBatchGroupBuffer> BatchGroupBuffers => m_batchBuffer;
         private List<InstancePassInfo> m_passInfos = new List<InstancePassInfo>();
                
@@ -60,6 +61,39 @@ namespace UnityEngine.Rendering.Universal
             return  SnapshotAtlas.Create();
         }
 
+        public IBatchGroupBuffer CreateGroupBuffer(EInstanceRenderMode renderMode)
+        {
+            switch (renderMode)
+            {
+                case EInstanceRenderMode.CommandInstancing:
+                {
+                    var buffer = new CommandInstancingBuffer();
+                    m_batchBuffer.Add(buffer);
+                    return buffer;
+                }
+
+                case EInstanceRenderMode.Impostor:
+                {
+                    var buffer = new ImpostorInstancingBuffer();
+                    m_batchBuffer.Add(buffer);
+                    return buffer;
+                }
+                
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(renderMode), renderMode, null);
+            }
+
+            return null;
+        }
+        
+        public void RemoveGroupBuffer(IBatchGroupBuffer buffer)
+        {
+            if (m_batchBuffer.Remove(buffer))
+            {
+                buffer.Clear();
+            }
+        }
+        
         public void AddSnapshotTask(ImpostorSnapshotAtlas.Snapshot snapshot, Mesh mesh, Material[] materials)
         {
             SnapshotTask task = new SnapshotTask(snapshot, mesh, materials);
