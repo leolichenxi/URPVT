@@ -78,7 +78,12 @@ namespace UnityEngine.Rendering.Universal
                     m_batchBuffer.Add(buffer);
                     return buffer;
                 }
-                
+                case EInstanceRenderMode.GraphicsInstanced:
+                {
+                    var buffer = new GraphicsInstancedBuffer();
+                    m_batchBuffer.Add(buffer);
+                    return buffer;
+                }
                 default:
                     throw new ArgumentOutOfRangeException(nameof(renderMode), renderMode, null);
             }

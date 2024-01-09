@@ -6,12 +6,10 @@
         public bool HasElement => ValidLength > 0;
         public bool HasSpace => ValidLength < Capacity;
         public Matrix4x4[] MatrixBuffer => m_buffer;
-        public MaterialPropertyBlock PropertyBlocks => m_PropertyBlocks;
         public int ValidLength { get; private set; }
         public int Capacity { get; private set; }
         private Matrix4x4[] m_buffer;
         private int[] m_objects;
-        private MaterialPropertyBlock m_PropertyBlocks;
         private int m_MaterialNum;
         public BatchGroup(int capacity)
         {
@@ -19,9 +17,7 @@
             ValidLength = 0;
             m_buffer = new Matrix4x4[Capacity];
             m_objects = new int[Capacity];
-            m_PropertyBlocks = new MaterialPropertyBlock();
         }
-
         /// <summary>
         /// 添加 返回当前值所在的下标
         /// </summary>
@@ -96,7 +92,6 @@
         public void Release()
         {
             this.ValidLength = 0;
-            m_PropertyBlocks.Clear();
         }
 
         public static int GetCapacity(int need)

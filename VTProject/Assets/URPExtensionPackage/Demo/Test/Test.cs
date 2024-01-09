@@ -8,6 +8,7 @@ using Random = System.Random;
 
 public class Test : MonoBehaviour
 {
+    public EInstanceRenderMode Mode = EInstanceRenderMode.CommandInstancing;
     public MeshRenderer InstancedMeshRender;
     public MeshFilter MeshFilter;
     // Start is called before the first frame update
@@ -30,9 +31,10 @@ public class Test : MonoBehaviour
 
     public void AddInstanced()
     {
+        Debug.Log(Mode.ToString());
         var mats = InstancedMeshRender.sharedMaterials;
         var mesh = MeshFilter.sharedMesh;
-        var buffer = GeometryInstancingManager.Instance.CreateGroupBuffer(EInstanceRenderMode.CommandInstancing);
+        var buffer = GeometryInstancingManager.Instance.CreateGroupBuffer(Mode);
         m_groupBuffer = buffer;
         int[] matKey = new int[mats.Length];
 
@@ -43,7 +45,7 @@ public class Test : MonoBehaviour
         
         buffer.Init(mesh.GetInstanceID(),matKey,0,new DrawPrefabSetting()
         {
-            HasPreZ = true,
+            HasPreZ = false,
             HasShadow = true,
             UseImpostor = false,
             IsTransparent = true,
@@ -59,7 +61,6 @@ public class Test : MonoBehaviour
                 position += new Vector3(x, 0, y);
                 buffer.AddInstanceObject(x *1000000 + y,float4x4.TRS(position,transform.rotation,transform.localScale));
             }
-         
         }
         
     }

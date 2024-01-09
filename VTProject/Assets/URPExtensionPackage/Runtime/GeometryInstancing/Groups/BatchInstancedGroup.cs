@@ -53,9 +53,9 @@ namespace UnityEngine.Rendering.Universal
         {
             BatchGroupData.SetInstanceRenderInfo(mesh,materials);
         }
-        public void SetImpostorInstanceRenderInfo(Mesh mesh, Material[] materials)
+        public void SetImpostorInstanceRenderInfo(Mesh mesh, Material[] materials,ImpostorSnapshotAtlas.Snapshot snapshot)
         {
-            BatchGroupData.SetImpostorInstanceRenderInfo(mesh,materials);
+            BatchGroupData.SetImpostorInstanceRenderInfo(mesh,materials, snapshot);
         }
 
         public bool IsEmpty()

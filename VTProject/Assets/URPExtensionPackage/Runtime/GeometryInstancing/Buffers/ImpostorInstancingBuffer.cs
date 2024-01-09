@@ -23,7 +23,7 @@
             BatchInstancedGroup.Init(meshKey, materialKey, objType, setting);
             m_instancingMaterialProperty.RegisterFloatProperty("_Size");
             m_snapshotRT = GeometryInstancingManager.Instance.CreateSnapshot();
-            m_renderInfoSet = false;
+            m_isRenderInfoSet = false;
 
             int floatProCount = m_instancingMaterialProperty.FloatPropertyName.Count;
             int vecProCount = m_instancingMaterialProperty.VectorPropertyName.Count;
@@ -42,23 +42,22 @@
             }
         }
 
-        private bool m_renderInfoSet;
+        private bool m_isRenderInfoSet;
 
         public void SetRenderInfo(Mesh mesh, Material[] materials)
         {
-            if (m_renderInfoSet)
+            if (m_isRenderInfoSet)
             {
                 return;
             }
 
-            m_renderInfoSet = false;
-            BatchInstancedGroup.SetImpostorInstanceRenderInfo(mesh, materials);
+            m_isRenderInfoSet = false;
             if (!ImpostorMesh)
             {
                 ImpostorMesh = ImpostorUtility.CreateImpostorMesh(mesh.bounds, m_snapshotRT);
             }
-
             SnapshotMaterails = materials;
+            BatchInstancedGroup.SetImpostorInstanceRenderInfo(mesh, materials,m_snapshotRT);
             GeometryInstancingManager.Instance.AddSnapshotTask(this.m_snapshotRT, ImpostorMesh, SnapshotMaterails);
         }
 
@@ -146,8 +145,7 @@
                     var passId = batchGroupData.PassIds[i];
                     if (passId.HasShadowCasterPass)
                     {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer,
-                            batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
                     }
                 }
             }
@@ -163,8 +161,7 @@
                     var passId = batchGroupData.PassIds[i];
                     if (passId.HasPreZPass)
                     {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].PreZPass, batchGroup.MatrixBuffer,
-                            batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].PreZPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
                     }
                 }
             }

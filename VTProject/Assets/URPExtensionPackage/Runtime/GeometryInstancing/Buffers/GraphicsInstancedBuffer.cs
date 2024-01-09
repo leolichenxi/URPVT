@@ -2,9 +2,9 @@
 
 namespace UnityEngine.Rendering.Universal
 {
-    public class CommandInstancingBuffer : IBatchGroupBuffer
+    public class GraphicsInstancedBuffer : IBatchGroupBuffer
     {
-        public EInstanceRenderMode InstanceRenderMode { get; }
+        public EInstanceRenderMode InstanceRenderMode { get; } = EInstanceRenderMode.GraphicsInstanced;
         public int Layer { get; set; }
 
         public BatchInstancedGroup BatchInstancedGroup { get; private set; } = new BatchInstancedGroup();
@@ -38,11 +38,6 @@ namespace UnityEngine.Rendering.Universal
         {
             switch (passInfo.passType)
             {
-                case EInstancePassType.ShadowCaster:
-                {
-                    DrawShadow(cmd);
-                }
-                    break;
                 case EInstancePassType.RenderingOpaque:
                 {
                     if (!BatchInstancedGroup.Setting.IsTransparent)
@@ -63,14 +58,6 @@ namespace UnityEngine.Rendering.Universal
                         }
                     }
                     break;
-                case EInstancePassType.PreZ:
-                    if (BatchInstancedGroup.Setting.HasPreZ)
-                    {
-                        DrawPreZ(cmd);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
 
@@ -101,58 +88,19 @@ namespace UnityEngine.Rendering.Universal
                 var batchGroupData = BatchInstancedGroup.BatchGroupData;
                 for (int i = 0; i < BatchInstancedGroup.MatNum; i++)
                 {
-                    var passId = batchGroupData.PassIds[i];
-                    if (BatchInstancedGroup.Setting.HasPreZ)
-                    {
-                        if (passId.HasAfterPreZPass)
-                        {
-                            cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].AfterPreZPass, batchGroup.MatrixBuffer,
-                                batchGroup.ValidLength,
-                                batchGroup.PropertyBlocks);
-                            continue;
-                        }
-                    }
-
-                    if (passId.HasPass)
-                    {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].Pass, batchGroup.MatrixBuffer, batchGroup.ValidLength,
-                            batchGroup.PropertyBlocks);
-                    }
+                    Graphics.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i],  batchGroup.MatrixBuffer, batchGroup.ValidLength);
                 }
             }
         }
 
         private void DrawBatchShadow(CommandBuffer cmd, BatchGroup batchGroup)
         {
-            if (batchGroup.HasElement)
-            {
-                var batchGroupData = BatchInstancedGroup.BatchGroupData;
-                for (int i = 0; i < batchGroupData.MatNum; i++)
-                {
-                    var passId = batchGroupData.PassIds[i];
-                    if (passId.HasShadowCasterPass)
-                    {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
-                    }
-                }
-            }
+        
         }
 
         private void DrawBatchPreZ(CommandBuffer cmd, BatchGroup batchGroup)
         {
-            if (batchGroup.HasElement)
-            {
-                var batchGroupData = BatchInstancedGroup.BatchGroupData;
-                for (int i = 0; i < batchGroupData.MatNum; i++)
-                {
-                    var passId = batchGroupData.PassIds[i];
-                    if (passId.HasPreZPass)
-                    {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].PreZPass, batchGroup.MatrixBuffer,
-                            batchGroup.ValidLength);
-                    }
-                }
-            }
+            
         }
     }
 }

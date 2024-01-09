@@ -13,7 +13,7 @@
         public Material[] Materials;
         public int MatNum;
         public PassID[] PassIds;
-        private ImpostorSnapshotAtlas.Snapshot m_snapshotRT;
+        // private ImpostorSnapshotAtlas.Snapshot m_snapshotRT;
         public void SetInstanceRenderInfo(Mesh mesh, Material[] materials)
         {
             this.Mesh = mesh;
@@ -27,7 +27,7 @@
             MatNum = num;
         }
         
-        public void SetImpostorInstanceRenderInfo(Mesh mesh, Material[] materials)
+        public void SetImpostorInstanceRenderInfo(Mesh mesh, Material[] materials,ImpostorSnapshotAtlas.Snapshot snapshotRT)
         {
             this.Mesh = mesh;
             int num  = materials.Length;
@@ -37,8 +37,8 @@
                 this.Materials[i] = new Material(materials[i]);
                 var material = this.Materials[i];
                 material.enableInstancing = true;
-                material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_TEX), m_snapshotRT.SnapshotAtlas.ColorRT);
-                material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_DEPTH_TEX), m_snapshotRT.SnapshotAtlas.DepthRT);
+                material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_TEX), snapshotRT.SnapshotAtlas.ColorRT);
+                material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_DEPTH_TEX), snapshotRT.SnapshotAtlas.DepthRT);
             }
             MatNum = num;
             this.PassIds = new PassID[1];

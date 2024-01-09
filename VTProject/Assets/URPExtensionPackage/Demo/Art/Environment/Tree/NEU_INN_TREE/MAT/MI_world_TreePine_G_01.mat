@@ -205,6 +205,6 @@ Material:
     - _HueVariation: {r: 0.7264151, g: 0.6129994, b: 0.31915274, a: 0.1}
     - _ScatterColor: {r: 0.51781267, g: 1, b: 0.42138356, a: 1}
     - _SnowColor: {r: 1, g: 1, b: 1, a: 1}
-    - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
+    - _SpecColor: {r: 0.19999993, g: 0.19999993, b: 0.19999993, a: 0.5}
     - _Wind: {r: 0.01, g: 0, b: 0, a: 0.01}
   m_BuildTextureStacks: []
