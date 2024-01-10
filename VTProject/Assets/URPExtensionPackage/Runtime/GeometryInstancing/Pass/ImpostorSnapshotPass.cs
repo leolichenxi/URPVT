@@ -24,14 +24,15 @@ namespace UnityEngine.Rendering.Universal.Internal
             
             
             m_worldToCameraMatrix = Matrix4x4.identity;
-            m_projectionMatrix = Matrix4x4.Ortho(-1, 1, -1, 1, InstanceConst.IMPOSTOR_PROJECT_NEAR, InstanceConst.IMPOSTOR_PROJECT_FAR);
+            m_projectionMatrix = Matrix4x4.Ortho(-1, 1, -1, 1, ImpostorConst.IMPOSTOR_PROJECT_NEAR, ImpostorConst.IMPOSTOR_PROJECT_FAR);
 
-            m_tempColor = new RenderTexture(InstanceConst.SnapRTSize, InstanceConst.SnapRTSize, 16, InstanceConst.AtlasColorFormat, RenderTextureReadWrite.Linear);
+            m_tempColor = new RenderTexture(ImpostorConst.SnapRTSize, ImpostorConst.SnapRTSize, 16, ImpostorConst.AtlasColorFormat, RenderTextureReadWrite.Linear);
             m_tempColor.name = "SnapshotTempColor";
             m_tempColor.useMipMap = false;
             m_tempColor.filterMode = FilterMode.Bilinear;
+            m_tempColor.autoGenerateMips = false;
 
-            m_tempDepth = new RenderTexture(InstanceConst.SnapRTSize, InstanceConst.SnapRTSize, 16, InstanceConst.AtlasColorFormat, RenderTextureReadWrite.Linear);
+            m_tempDepth = new RenderTexture(ImpostorConst.SnapRTSize, ImpostorConst.SnapRTSize, 16, ImpostorConst.AtlasColorFormat, RenderTextureReadWrite.Linear);
             m_tempDepth.name = "SnapshotTempDepth";
             m_tempDepth.useMipMap = false;
             m_tempDepth.filterMode = FilterMode.Point;
@@ -61,8 +62,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             {
                 Update();
             }
-
-            if (!m_pause && !s_Manager.IsTaskNotEmpty())
+            if (!m_pause && s_Manager.IsTaskNotEmpty())
             {
                 //Vector3 vEye = -cam.transform.forward * 15;
                 //_worldToCameraMatrix = Matrix4x4.LookAt(vEye, Vector3.zero, cam.transform.up);
@@ -77,12 +77,12 @@ namespace UnityEngine.Rendering.Universal.Internal
                 worldToLocalMatrix = worldToLocalMatrix.inverse;
                 m_worldToCameraMatrix = Matrix4x4.Scale(new Vector3(1, 1, -1)) * worldToLocalMatrix;
 
-                CommandBuffer cmd = CommandBufferPool.Get(InstanceConst.IMPOSTOR_SNAPSHOT_PASS);
-                using (ProfilingScope scope = new ProfilingScope(cmd, new ProfilingSampler(InstanceConst.IMPOSTOR_SNAPSHOT_PASS)))
+                CommandBuffer cmd = CommandBufferPool.Get(ImpostorConst.IMPOSTOR_SNAPSHOT_PASS);
+                using (ProfilingScope scope = new ProfilingScope(cmd, new ProfilingSampler(ImpostorConst.IMPOSTOR_SNAPSHOT_PASS)))
                 {
                     cmd.Clear();
                     cmd.SetViewProjectionMatrices(m_worldToCameraMatrix,m_projectionMatrix);
-                    cmd.SetGlobalVector(InstanceConst.ImpostorZBufferParam,ComputeZBufferParam());
+                    cmd.SetGlobalVector(ImpostorConst.ImpostorZBufferParam,ComputeZBufferParam());
                     Queue<SnapshotTask> queue = s_Manager.SwitchTask();
                     while (queue.Count > 0)
                     {
@@ -93,38 +93,36 @@ namespace UnityEngine.Rendering.Universal.Internal
                             float scale = 1 / Mathf.Max(Mathf.Max(aabb.extents.x, aabb.extents.y), aabb.extents.z);
                             //float scale = 1 / Mathf.Max(aabb.extents.x, aabb.extents.y);
                             m_verticeScale = new Vector3(scale, scale, scale);
-
                             Matrix4x4 modelMatrix = Matrix4x4.Scale(m_verticeScale) * Matrix4x4.Translate(-aabb.center);
-
                             // 零时处理，对应fbx导入时轴对齐，x轴-90
                             //Matrix4x4 modelMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(-90, 0, 0), _verticeScale) * Matrix4x4.Translate(-aabb.center);
-
                             cmd.SetRenderTarget(m_tempColor, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
-                            cmd.ClearRenderTarget(true, true, new Color(0, 0, 0, 0));
+                            cmd.ClearRenderTarget(true, true, ImpostorConst.ImpostorBackGroundColor);
                             for (int i = 0; i < task.Materials.Length; ++i)
                             {
                                 cmd.DrawMesh(task.Mesh, modelMatrix, task.Materials[i], i, task.ShaderPass[i]);
                             }
-
                             if (task.Atlas != null)
                             {
                                 task.Atlas.Blit(cmd, m_tempColor, ImpostorSnapshotAtlas.EBlitMode.BLIT_COLOR);
                             }
-
                             cmd.SetRenderTarget(m_tempDepth, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store);
                             cmd.ClearRenderTarget(true, true, new Color(0, 0, 0, 0));
                             for (int i = 0; i < task.Materials.Length; ++i)
                             {
                                 cmd.DrawMesh(task.Mesh, modelMatrix, task.Materials[i], i, task.DepthPass[i]);
                             }
-
                             if (task.Atlas != null)
                             {
                                 task.Atlas.Blit(cmd, m_tempDepth, ImpostorSnapshotAtlas.EBlitMode.BLIT_DEPTH);
                             }
                         }
                     }
+                    cmd.SetViewProjectionMatrices(cam.worldToCameraMatrix, cam.projectionMatrix);
+                    context.ExecuteCommandBuffer(cmd);
+                    cmd.Clear();
                 }
+                CommandBufferPool.Release(cmd);
             }
         }
         private void Update()
@@ -134,8 +132,8 @@ namespace UnityEngine.Rendering.Universal.Internal
         
         private Vector4 ComputeZBufferParam()
         {
-            float n = InstanceConst.IMPOSTOR_PROJECT_NEAR;
-            float f = InstanceConst.IMPOSTOR_PROJECT_FAR;
+            float n = ImpostorConst.IMPOSTOR_PROJECT_NEAR;
+            float f = ImpostorConst.IMPOSTOR_PROJECT_FAR;
             float v = n > 0 ? (f - n) / n * f : 0;
             return new Vector4(n, f - n, v, 1 / f);
         }

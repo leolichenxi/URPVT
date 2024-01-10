@@ -20,18 +20,18 @@ namespace UnityEngine.Rendering.Universal
                 return m_instance;
             }
         }
-        
-        public ImpostorSnapshotAtlas SnapshotAtlas { get; private set; } =  new ImpostorSnapshotAtlas();
+
+        public ImpostorSnapshotAtlas SnapshotAtlas { get; private set; } = new ImpostorSnapshotAtlas();
 
         private List<IBatchGroupBuffer> m_batchBuffer = new List<IBatchGroupBuffer>();
         public IReadOnlyList<IBatchGroupBuffer> BatchGroupBuffers => m_batchBuffer;
         private List<InstancePassInfo> m_passInfos = new List<InstancePassInfo>();
-               
         private UQueue<SnapshotTask> m_tasksQueue = new UQueue<SnapshotTask>(); // 替换List避免编辑器嵌套调用时错误
         public uint BoundsCheckCode = 0;
 
-        
+
         private int m_refreshSnapshot = 1;
+
         private void UpdateBoundsCheckCode()
         {
             BoundsCheckCode++;
@@ -40,7 +40,7 @@ namespace UnityEngine.Rendering.Universal
                 BoundsCheckCode = 0;
             }
         }
-        
+
         public void RefreshImpostor(int refresh = 1)
         {
             m_refreshSnapshot = refresh;
@@ -50,7 +50,7 @@ namespace UnityEngine.Rendering.Universal
         {
             return !m_tasksQueue.IsEmpty;
         }
-        
+
         public Queue<SnapshotTask> SwitchTask()
         {
             return m_tasksQueue.Switch();
@@ -58,7 +58,12 @@ namespace UnityEngine.Rendering.Universal
 
         public ImpostorSnapshotAtlas.Snapshot CreateSnapshot()
         {
-            return  SnapshotAtlas.Create();
+            return SnapshotAtlas.Create();
+        }
+
+        public bool RemoveSnapshot(ImpostorSnapshotAtlas.Snapshot snapshot)
+        {
+            return SnapshotAtlas.RemoveSnapshot(snapshot);
         }
 
         public IBatchGroupBuffer CreateGroupBuffer(EInstanceRenderMode renderMode)
@@ -90,7 +95,7 @@ namespace UnityEngine.Rendering.Universal
 
             return null;
         }
-        
+
         public void RemoveGroupBuffer(IBatchGroupBuffer buffer)
         {
             if (m_batchBuffer.Remove(buffer))
@@ -98,13 +103,13 @@ namespace UnityEngine.Rendering.Universal
                 buffer.Clear();
             }
         }
-        
+
         public void AddSnapshotTask(ImpostorSnapshotAtlas.Snapshot snapshot, Mesh mesh, Material[] materials)
         {
             SnapshotTask task = new SnapshotTask(snapshot, mesh, materials);
             m_tasksQueue.Enqueue(task);
         }
-        
+
         internal InstancePassInfo SafeGetPassInfo(Camera cam, EInstancePassType passType, int cascadeIndex = 0)
         {
             int num = m_passInfos.Count;
@@ -113,16 +118,17 @@ namespace UnityEngine.Rendering.Universal
                 var passInfo = m_passInfos[i];
                 if (passInfo.camera == cam && passInfo.passType == passType && passInfo.cascadeIndex == cascadeIndex)
                 {
-                    passInfo.BoundsCheckCode = BoundsCheckCode + (uint)i;// 为了让每个Pass的CheckCode唯一
+                    passInfo.BoundsCheckCode = BoundsCheckCode + (uint)i; // 为了让每个Pass的CheckCode唯一
                     return passInfo;
                 }
             }
+
             InstancePassInfo p = new InstancePassInfo();
             p.camera = cam;
             p.passType = passType;
             p.cascadeIndex = cascadeIndex;
             p.index = num;
-            p.BoundsCheckCode = BoundsCheckCode + (uint)num;// 为了让每个Pass的CheckCode唯一
+            p.BoundsCheckCode = BoundsCheckCode + (uint)num; // 为了让每个Pass的CheckCode唯一
             m_passInfos.Add(p);
             return p;
         }

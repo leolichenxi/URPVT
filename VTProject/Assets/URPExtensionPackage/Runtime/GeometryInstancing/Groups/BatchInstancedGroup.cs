@@ -111,7 +111,7 @@ namespace UnityEngine.Rendering.Universal
 
                 if (dataIndex < 0)
                 {
-                    var groupData = new BatchGroup(InstanceConst.MAX_BATCH_DRAW_COUNT);
+                    var groupData = new BatchGroup(ImpostorConst.MAX_BATCH_DRAW_COUNT);
                     batchIndex = m_drawGroups.Count;
                     m_drawGroups.Add(groupData);
                     dataIndex = groupData.AddMatrix(uid, matrix);

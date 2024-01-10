@@ -37,7 +37,7 @@ namespace UnityEngine.Rendering.Universal
         {
             if (arrayIndex >= array.Count || arrayIndex < 0)
             {
-                Debug.LogError("arrayIndex out of range.");
+                Debug.LogError($"arrayIndex out of range. array count = {array.Count}, arrayIndex = {arrayIndex}");
             }
             int lastIndex = array.Count - 1;
             if (arrayIndex != lastIndex)

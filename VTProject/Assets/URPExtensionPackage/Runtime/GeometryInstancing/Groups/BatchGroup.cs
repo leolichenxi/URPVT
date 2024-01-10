@@ -96,9 +96,9 @@
 
         public static int GetCapacity(int need)
         {
-            if (need >= InstanceConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT)
+            if (need >= ImpostorConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT)
             {
-                return InstanceConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT;
+                return ImpostorConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT;
             }
 
             return need;

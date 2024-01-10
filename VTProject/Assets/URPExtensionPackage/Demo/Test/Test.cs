@@ -42,7 +42,9 @@ public class Test : MonoBehaviour
         {
             matKey[i] = mats[i].GetInstanceID();
         }
-        
+
+        // TestPass.RenderMesh = mesh;
+        // TestPass.RenderMaterial = InstancedMeshRender.sharedMaterial;
         buffer.Init(mesh.GetInstanceID(),matKey,0,new DrawPrefabSetting()
         {
             HasPreZ = false,

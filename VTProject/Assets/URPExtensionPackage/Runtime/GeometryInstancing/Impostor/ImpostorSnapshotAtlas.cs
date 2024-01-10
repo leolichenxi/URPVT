@@ -42,25 +42,21 @@ namespace UnityEngine.Rendering.Universal
                 m_index = indexInList;
                 m_blockNum = m_blockX * m_blockY;
                 m_snapshots = new List<Snapshot>(m_blockNum);
-                ColorRT = ImpostorUtility.CreateSnapColorRT("SnapshotAtlas" + indexInList);
-                DepthRT = ImpostorUtility.CreateSnapShadowRT("SnapshotDepthAtlas" + indexInList);
+                ColorRT = ImpostorUtility.CreateSnapColorRT("SnapshotAtlas_" + indexInList);
+                DepthRT = ImpostorUtility.CreateSnapShadowRT("SnapshotDepthAtlas_" + indexInList);
             }
 
             public void AddSnapShot(Snapshot snapshot)
             {
-                int index = -1;
                 if (m_snapshots.Count< m_blockNum)
                 {
-                    index = m_snapshots.Count;
-                    m_snapshots.Add(snapshot);
-                }
-                if (index >= 0)
-                {
+                    int index = m_snapshots.Count;
                     snapshot.index = index;
                     snapshot.u = ((float)(index / m_blockX)) / this.m_blockX;
                     snapshot.v = ((float)(index % m_blockX)) / this.m_blockY;
                     snapshot.size = 1.0f / this.m_blockX;
                     m_objCount = ObjCount + 1;
+                    m_snapshots.Add(snapshot);
                 }
                 else
                 {
@@ -72,7 +68,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 int index = snapshot.index;
                 m_snapshots.RemoveSwapAt(snapshot.index);
-                if (index>0 )
+                if (index!= m_snapshots.Count)
                 {
                     m_snapshots[index].index = index;
                 }
@@ -84,6 +80,7 @@ namespace UnityEngine.Rendering.Universal
                      GL.Clear(true, true, new Color(0, 0, 0, 0));
                      Graphics.SetRenderTarget(this.DepthRT);
                      GL.Clear(true, true, new Color(0, 0, 0, 0));
+                     
                 }
             }
 
@@ -91,7 +88,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 cmd.SetRenderTarget(ColorRT);
                 Rect viewPort = new Rect();
-                viewPort.Set(snapshot.u * InstanceConst.AtlasRTSize, snapshot.v * InstanceConst.AtlasRTSize, InstanceConst.SnapRTSize, InstanceConst.SnapRTSize);
+                viewPort.Set(snapshot.u * ImpostorConst.AtlasRTSize, snapshot.v * ImpostorConst.AtlasRTSize, ImpostorConst.SnapRTSize, ImpostorConst.SnapRTSize);
                 cmd.SetViewport(viewPort);
                 ImpostorUtility.DoCopyColor(cmd, src);
             }
@@ -100,7 +97,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 cmd.SetRenderTarget(DepthRT);
                 Rect viewPort = new Rect();
-                viewPort.Set(snapshot.u * InstanceConst.AtlasRTSize, snapshot.v * InstanceConst.AtlasRTSize, InstanceConst.SnapRTSize, InstanceConst.SnapRTSize);
+                viewPort.Set(snapshot.u * ImpostorConst.AtlasRTSize, snapshot.v * ImpostorConst.AtlasRTSize, ImpostorConst.SnapRTSize, ImpostorConst.SnapRTSize);
                 cmd.SetViewport(viewPort);
                 //GraphicsEx.DrawTextureCB(cmd, source);
                 ImpostorUtility.DoCopyColor(cmd, src);
@@ -124,6 +121,9 @@ namespace UnityEngine.Rendering.Universal
 
         public class Snapshot
         {
+            /// <summary>
+            /// 记录在atlas中的下标
+            /// </summary>
             public int index;
             public float u;
             public float v;
@@ -175,6 +175,7 @@ namespace UnityEngine.Rendering.Universal
 
     public partial class ImpostorSnapshotAtlas
     {
+        public IReadOnlyList<SnapshotAtlas> Atlases => m_listAtlas;
         // 图集管理器
         private List<SnapshotAtlas> m_listAtlas = new List<SnapshotAtlas>();
         public Snapshot Create()
@@ -182,6 +183,12 @@ namespace UnityEngine.Rendering.Universal
             SnapshotAtlas sa = GetAvailableAtlas();
             Snapshot s = new ImpostorSnapshotAtlas.Snapshot(sa);
             return s;
+        }      
+        
+        public bool RemoveSnapshot(Snapshot snapshot)
+        {
+            snapshot.SnapshotAtlas.RemoveSnapShot(snapshot);
+            return true;
         }
 
         private SnapshotAtlas GetAvailableAtlas()
@@ -195,7 +202,7 @@ namespace UnityEngine.Rendering.Universal
                     return sa;
                 }
             }
-            sa = new SnapshotAtlas(InstanceConst.BLOCK_X, InstanceConst.BLOCK_Y, m_listAtlas.Count);
+            sa = new SnapshotAtlas(ImpostorConst.BLOCK_X, ImpostorConst.BLOCK_Y, m_listAtlas.Count);
             m_listAtlas.Add(sa);
             return sa;
         }

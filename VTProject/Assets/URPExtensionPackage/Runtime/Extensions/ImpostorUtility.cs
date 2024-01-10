@@ -60,8 +60,8 @@ namespace UnityEngine.Rendering.Universal
 
         public static RenderTexture CreateSnapColorRT(string rtName)
         {
-            RenderTextureFormat renderTextureFormat = InstanceConst.AtlasColorFormat;
-            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(InstanceConst.AtlasRTSize, InstanceConst.AtlasRTSize);
+            RenderTextureFormat renderTextureFormat = ImpostorConst.AtlasColorFormat;
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(ImpostorConst.AtlasRTSize, ImpostorConst.AtlasRTSize);
             descriptor.depthBufferBits = 0;
             descriptor.colorFormat = renderTextureFormat;
             descriptor.useMipMap = true;
@@ -69,17 +69,15 @@ namespace UnityEngine.Rendering.Universal
             descriptor.mipCount = 4;
             descriptor.msaaSamples = 1;
             var rt = new RenderTexture(descriptor);
-
             rt.name = rtName;
             rt.filterMode = FilterMode.Bilinear;
-
-            return new RenderTexture(descriptor);
+            return rt;
         }
 
         public static RenderTexture CreateSnapShadowRT(string rtName)
         {
-            RenderTextureFormat renderTextureFormat = InstanceConst.AtlasShadowFormat;
-            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(InstanceConst.AtlasRTSize, InstanceConst.AtlasRTSize);
+            RenderTextureFormat renderTextureFormat = ImpostorConst.AtlasShadowFormat;
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(ImpostorConst.AtlasRTSize, ImpostorConst.AtlasRTSize);
             descriptor.depthBufferBits = 16;
             descriptor.colorFormat = renderTextureFormat;
             descriptor.useMipMap = false;
@@ -88,10 +86,8 @@ namespace UnityEngine.Rendering.Universal
             descriptor.sRGB = false;
 
             var rt = new RenderTexture(descriptor);
-
             rt.name = rtName;
             rt.filterMode = FilterMode.Point;
-
             return rt;
         }
 

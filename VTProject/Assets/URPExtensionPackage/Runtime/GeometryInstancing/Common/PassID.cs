@@ -25,24 +25,24 @@
             
             if (material != null)
             {
-                Pass = material.FindPass(InstanceConst.PassAfterZ);
+                Pass = material.FindPass(ImpostorConst.PassAfterZ);
                 if (Pass == -1)
                 {
-                    Pass = material.FindPass(InstanceConst.PassForwardLit);
+                    Pass = material.FindPass(ImpostorConst.PassForwardLit);
                 }
                 if (Pass == -1)
                 {
-                    Pass = material.FindPass(InstanceConst.PassMain);
+                    Pass = material.FindPass(ImpostorConst.PassMain);
                 }
                 if (Pass == -1)
                 {
                     Pass = 0;
                 }
 
-                ShadowCasterPass = material.FindPass(InstanceConst.PassShadowCaster);
+                ShadowCasterPass = material.FindPass(ImpostorConst.PassShadowCaster);
                 if (findImpostor)
                 {
-                    ImpostorPass = material.FindPass(InstanceConst.PassImpostor);
+                    ImpostorPass = material.FindPass(ImpostorConst.PassImpostor);
                     if (ImpostorPass > 0)
                     {
                         Pass = ImpostorPass;
@@ -50,8 +50,8 @@
                 }
                 else
                 {
-                    PreZPass = material.FindPass(InstanceConst.PassPreZ);
-                    AfterPreZPass = material.FindPass(InstanceConst.PassAfterZ);
+                    PreZPass = material.FindPass(ImpostorConst.PassPreZ);
+                    AfterPreZPass = material.FindPass(ImpostorConst.PassAfterZ);
                 }
             }
         }

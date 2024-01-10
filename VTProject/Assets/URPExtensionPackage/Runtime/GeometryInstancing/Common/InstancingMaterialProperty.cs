@@ -15,7 +15,7 @@ namespace UnityEngine.Rendering.Universal
         /// <param name="name"></param>
         public void RegisterFloatProperty(string name)
         {
-            if (FloatPropertyName.Count >= InstanceConst.MAX_PROPERTY_COUNT)
+            if (FloatPropertyName.Count >= ImpostorConst.MAX_PROPERTY_COUNT)
             {
                 throw new NotSupportedException("Number of Property is [0, 32]");
             }
@@ -32,7 +32,7 @@ namespace UnityEngine.Rendering.Universal
         /// <param name="name"></param>
         public void RegisterVectorProperty(string name)
         {
-            if (VectorPropertyName.Count >= InstanceConst.MAX_PROPERTY_COUNT)
+            if (VectorPropertyName.Count >= ImpostorConst.MAX_PROPERTY_COUNT)
             {
                 throw new NotSupportedException("Number of Property is [0, 32]");
             }

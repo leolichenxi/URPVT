@@ -8,12 +8,12 @@ namespace UnityEngine.Rendering.Universal
     public class ImpostorFeature : ScriptableRendererFeature
     {
         private ImpostorSnapshotPass m_impostorSnapshotPass;
-        private GeometryInstancingPass m_geometryInstancingOpaquePass;
+        // private GeometryInstancingPass m_geometryInstancingOpaquePass;
         private GeometryInstancingPass m_geometryInstancingTransparentPass;
         public override void Create()
         {
             m_impostorSnapshotPass = new ImpostorSnapshotPass(RenderPassEvent.BeforeRenderingShadows);
-            m_geometryInstancingOpaquePass = new GeometryInstancingPass(RenderPassEvent.BeforeRenderingOpaques + 1,EInstancePassType.RenderingOpaque);
+            // m_geometryInstancingOpaquePass = new GeometryInstancingPass(RenderPassEvent.BeforeRenderingOpaques + 1,EInstancePassType.RenderingOpaque);
             m_geometryInstancingTransparentPass = new GeometryInstancingPass(RenderPassEvent.BeforeRenderingTransparents,EInstancePassType.RenderingTransparent);
         }
 
@@ -24,7 +24,7 @@ namespace UnityEngine.Rendering.Universal
                 return;
             }
             renderer.EnqueuePass(m_impostorSnapshotPass);
-            renderer.EnqueuePass(m_geometryInstancingOpaquePass);
+            // renderer.EnqueuePass(m_geometryInstancingOpaquePass);
             renderer.EnqueuePass(m_geometryInstancingTransparentPass);
         }
     }

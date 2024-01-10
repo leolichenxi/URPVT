@@ -1,6 +1,6 @@
 ﻿namespace UnityEngine.Rendering.Universal
 {
-    public static class InstanceConst
+    public static class ImpostorConst
     {
         public const string GEOMETRY_INSTANCING_PASS_TAG = "GeometryInstancingPass";
         public const string IMPOSTOR_SNAPSHOT_PASS = "ImpostorSnapshotPass";
@@ -17,8 +17,8 @@
 
 
         // public static RenderTextureFormat Atlas_Color_Format = SystemInfo.SupportsTextureFormat(TextureFormat.ARGB32) ? RenderTextureFormat.ARGBHalf : RenderTextureFormat.ARGB32;
-        public static RenderTextureFormat AtlasColorFormat = RenderTextureFormat.ARGB32;
-        public static RenderTextureFormat AtlasShadowFormat = RenderTextureFormat.RHalf;
+        public static readonly RenderTextureFormat AtlasColorFormat = RenderTextureFormat.ARGB32;
+        public static readonly RenderTextureFormat AtlasShadowFormat = RenderTextureFormat.RHalf;
         
         #region PassName 定义
 
@@ -29,8 +29,8 @@
         public static readonly string PassImpostor = "Impostor";
         public static readonly string PassPreZ = "PreZ";
 
-        public static int AtlasRTSize = 1024; // 512 *2
-        public static int SnapRTSize = 256 ; // 128 *2 
+        public static readonly int AtlasRTSize = 1024; // 512 *2
+        public static readonly int SnapRTSize = 256 ; // 128 *2 
         
         public const int BLOCK_X = 4 ; // AtlasRTSize/ SnapRTSize 
         public const int BLOCK_Y = 4 ; // AtlasRTSize/ SnapRTSize * 4 
@@ -47,13 +47,15 @@
         #endregion
         
         
-        public static int ImpostorZBufferParam = Shader.PropertyToID("_ImpostorZBufferParam");
+        public static readonly int ImpostorZBufferParam = Shader.PropertyToID("_ImpostorZBufferParam");
         public static int VBufferDepthEncodingParams = Shader.PropertyToID("_VBufferDepthEncodingParams");
-        
         
         // ShaderPass[i] = materials[i].FindPass("ImpostorSnapshot");
         // DepthPass[i] = materials[i].FindPass("ImpostorSnapshotShadow");
         public  const string PASS_NAME_IMPOSTOR_SNAPSHOT = "ImpostorSnapshot";
         public  const string PASS_NAME_IMPOSTOR_SNAPSHOT_SHADOW = "ImpostorSnapshotShadow";
+        
+        public static readonly Color ColorZero = new Color(0,0,0,0);
+        public static readonly Color ImpostorBackGroundColor = ColorZero;
     }
 }

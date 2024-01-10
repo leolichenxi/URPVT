@@ -37,8 +37,8 @@
                 this.Materials[i] = new Material(materials[i]);
                 var material = this.Materials[i];
                 material.enableInstancing = true;
-                material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_TEX), snapshotRT.SnapshotAtlas.ColorRT);
-                material.SetTexture(ShaderHelper.GetPropertyID(InstanceConst.PROPERTY_IMPOSTOR_DEPTH_TEX), snapshotRT.SnapshotAtlas.DepthRT);
+                material.SetTexture(ShaderHelper.GetPropertyID(ImpostorConst.PROPERTY_IMPOSTOR_TEX), snapshotRT.SnapshotAtlas.ColorRT);
+                material.SetTexture(ShaderHelper.GetPropertyID(ImpostorConst.PROPERTY_IMPOSTOR_DEPTH_TEX), snapshotRT.SnapshotAtlas.DepthRT);
             }
             MatNum = num;
             this.PassIds = new PassID[1];

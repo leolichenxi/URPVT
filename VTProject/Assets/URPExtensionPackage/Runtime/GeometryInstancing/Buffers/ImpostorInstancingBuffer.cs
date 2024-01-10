@@ -1,4 +1,6 @@
-﻿namespace UnityEngine.Rendering.Universal
+﻿using System;
+
+namespace UnityEngine.Rendering.Universal
 {
     public class ImpostorInstancingBuffer : IBatchGroupBuffer
     {
@@ -8,7 +10,7 @@
         private InstancingMaterialProperty m_instancingMaterialProperty = new InstancingMaterialProperty();
         public int Layer { get; set; }
         private Material[] SnapshotMaterails;
-        public BatchInstancedGroup BatchInstancedGroup { get; private set; }  = new BatchInstancedGroup();
+        public BatchInstancedGroup BatchInstancedGroup { get; private set; } = new BatchInstancedGroup();
         private MaterialPropertyBlock m_propertyBlock = new MaterialPropertyBlock();
         internal float[][] m_PropertyFloatsBuffer;
         internal Vector4[][] m_PropertyVectorsBuffer;
@@ -30,14 +32,14 @@
             m_PropertyFloatsBuffer = new float[floatProCount][];
             for (int i = 0; i < floatProCount; i++)
             {
-                float[] buffer = new float[InstanceConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT];
+                float[] buffer = new float[ImpostorConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT];
                 m_PropertyFloatsBuffer[i] = buffer;
             }
 
             m_PropertyVectorsBuffer = new Vector4[vecProCount][];
             for (int i = 0; i < vecProCount; i++)
             {
-                Vector4[] buffer = new Vector4[InstanceConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT];
+                Vector4[] buffer = new Vector4[ImpostorConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT];
                 m_PropertyVectorsBuffer[i] = buffer;
             }
         }
@@ -56,9 +58,10 @@
             {
                 ImpostorMesh = ImpostorUtility.CreateImpostorMesh(mesh.bounds, m_snapshotRT);
             }
+
             SnapshotMaterails = materials;
-            BatchInstancedGroup.SetImpostorInstanceRenderInfo(mesh, materials,m_snapshotRT);
-            GeometryInstancingManager.Instance.AddSnapshotTask(this.m_snapshotRT, ImpostorMesh, SnapshotMaterails);
+            BatchInstancedGroup.SetImpostorInstanceRenderInfo(mesh, materials, m_snapshotRT);
+            GeometryInstancingManager.Instance.AddSnapshotTask(this.m_snapshotRT, mesh, SnapshotMaterails);
         }
 
         public void AddInstanceObject(int uid, Matrix4x4 matrix)
@@ -73,17 +76,58 @@
 
         public void Clear()
         {
+            if (ImpostorMesh != null)
+            {
+                ImpostorMesh.Clear();
+                UnityEngine.Object.Destroy(ImpostorMesh);
+            }
+
+            SnapshotMaterails = null;
+            GeometryInstancingManager.Instance.RemoveSnapshot(m_snapshotRT);
             BatchInstancedGroup.Clear();
         }
 
-        public void DrawBatch(CommandBuffer cmd,InstancePassInfo passInfo)
+        public void DrawBatch(CommandBuffer cmd, InstancePassInfo passInfo)
         {
-            for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
+            switch (passInfo.passType)
             {
-                DrawBatchGroup(cmd, BatchInstancedGroup.BatchGroups[i]);
+                case EInstancePassType.ShadowCaster:
+                {
+                    DrawShadow(cmd);
+                }
+                    break;
+                case EInstancePassType.RenderingOpaque:
+                {
+                    if (!BatchInstancedGroup.Setting.IsTransparent)
+                    {
+                        for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
+                        {
+                            DrawBatchGroup(cmd, BatchInstancedGroup.BatchGroups[i]);
+                        }
+                    }
+                }
+                    break;
+                case EInstancePassType.RenderingTransparent:
+                    if (BatchInstancedGroup.Setting.IsTransparent)
+                    {
+                        for (int i = 0; i < BatchInstancedGroup.BatchGroups.Count; i++)
+                        {
+                            DrawBatchGroup(cmd, BatchInstancedGroup.BatchGroups[i]);
+                        }
+                    }
+
+                    break;
+                case EInstancePassType.PreZ:
+                    if (BatchInstancedGroup.Setting.HasPreZ)
+                    {
+                        DrawPreZ(cmd);
+                    }
+
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
-
 
         public void DrawShadow(CommandBuffer cmd)
         {
@@ -116,6 +160,10 @@
                 for (int i = 0; i < floatPropertyCount; i++)
                 {
                     m_propertyBlock.SetFloatArray(m_instancingMaterialProperty.FloatPropertyName[i], m_PropertyFloatsBuffer[i]);
+                    for (int j = 0; j < batchGroup.ValidLength; j++)
+                    {
+                        m_PropertyFloatsBuffer[i][j] = 4;
+                    }
                 }
 
                 for (int i = 0; i < vectorPropertyCount; i++)
@@ -145,7 +193,8 @@
                     var passId = batchGroupData.PassIds[i];
                     if (passId.HasShadowCasterPass)
                     {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].ShadowCasterPass, batchGroup.MatrixBuffer,
+                            batchGroup.ValidLength);
                     }
                 }
             }
@@ -161,7 +210,8 @@
                     var passId = batchGroupData.PassIds[i];
                     if (passId.HasPreZPass)
                     {
-                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].PreZPass, batchGroup.MatrixBuffer, batchGroup.ValidLength);
+                        cmd.DrawMeshInstanced(batchGroupData.Mesh, i, batchGroupData.Materials[i], batchGroupData.PassIds[i].PreZPass, batchGroup.MatrixBuffer,
+                            batchGroup.ValidLength);
                     }
                 }
             }
