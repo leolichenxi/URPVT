@@ -52,7 +52,6 @@
                 CameraPos.y = view.m13;
                 CameraPos.z = view.m23;
             }
-
             GeometryUtility.CalculateFrustumPlanes(proj * view, CameraPlanes);
         }
     }

@@ -58,7 +58,6 @@ namespace UnityEngine.Rendering.Universal
             {
                 ImpostorMesh = ImpostorUtility.CreateImpostorMesh(mesh.bounds, m_snapshotRT);
             }
-
             SnapshotMaterails = materials;
             BatchInstancedGroup.SetImpostorInstanceRenderInfo(mesh, materials, m_snapshotRT);
             GeometryInstancingManager.Instance.AddSnapshotTask(this.m_snapshotRT, mesh, SnapshotMaterails);

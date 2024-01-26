@@ -100,7 +100,6 @@
             {
                 return ImpostorConst.MAX_GEOMETRY_INSTANCE_DRAW_COUNT;
             }
-
             return need;
         }
     }

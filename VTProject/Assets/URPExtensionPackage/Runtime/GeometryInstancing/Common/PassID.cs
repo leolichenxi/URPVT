@@ -1,5 +1,8 @@
 ﻿namespace UnityEngine.Rendering.Universal
 {
+    /// <summary>
+    /// Shader Pass Info
+    /// </summary>
     public struct PassID
     {
         public int Pass;
@@ -21,7 +24,6 @@
             ImpostorPass = -1;
             PreZPass = -1;
             AfterPreZPass = -1;
-            
             
             if (material != null)
             {

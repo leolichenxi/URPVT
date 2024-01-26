@@ -5,9 +5,9 @@ namespace UnityEngine.Rendering.Universal
 {
     public class InstancingMaterialProperty
     {
-        public List<int> FloatPropertyName = new List<int>();
-        public List<int> VectorPropertyName = new List<int>();
-        public Dictionary<int, Texture> TextureProperty = new Dictionary<int, Texture>();
+        public readonly List<int> FloatPropertyName = new List<int>();
+        public readonly List<int> VectorPropertyName = new List<int>();
+        public readonly Dictionary<int, Texture> TextureProperty = new Dictionary<int, Texture>();
 
         /// <summary>
         /// Register float property
